@@ -1,0 +1,29 @@
+{
+  "name": "ppt-online",
+  "version": "1.0.0",
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.2"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.6",
+    "@vaadin/router": "^1.7.5",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^12.0.0",
+    "nano-id": "^1.1.0",
+    "parcel": "^2.10.3",
+    "process": "^0.11.10",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "dev:front": "parcel ./src/index.html --no-cache",
+    "dev": "nodemon --watch ./server/index.ts --exec ts-node server/dev.ts",
+    "build:front": "parcel build ./src/index.html --no-cache",
+    "build:back": "tsc --resolveJsonModule --skipLibCheck server/index.ts",
+    "build": "yarn build:front && yarn build:back",
+    "start": "node server/index.js"
+  }
+}
