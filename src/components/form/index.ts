@@ -51,6 +51,12 @@ export function init() {
         font-family: Odibee Sans;
         text-align: center;
       }
+
+      @media (max-width: 620px) {
+        .input{
+          padding:4px
+        }
+      }
       
       .input::placeholder{
         color: #D9D9D9;
