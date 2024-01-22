@@ -32,11 +32,13 @@ export function init() {
 
               state.askNewRoom(() => {
                 state.accessToRoom(() => {
-                  state.setOnlineStatus();
-                  state.pushMyGame(() => {
-                    Router.go("/new-game");
-                    buttonsContainer.classList.remove("display-none");
-                    waitingContainer.classList.remove("display-block");
+                  state.listenOpponentDataAndHistory(() => {
+                    state.setOnlineStatus();
+                    state.pushMyGame(() => {
+                      Router.go("/new-game");
+                      buttonsContainer.classList.remove("display-none");
+                      waitingContainer.classList.remove("display-block");
+                    });
                   });
                 });
               });

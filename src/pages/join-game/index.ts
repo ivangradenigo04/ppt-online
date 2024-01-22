@@ -30,11 +30,13 @@ export function init() {
 
             state.setGameroomId(e.target["id"].value);
             state.accessToRoom(() => {
-              state.setOnlineStatus();
-              state.pushMyGame(() => {
-                Router.go("/rules");
-                formEl.classList.remove("display-none");
-                waitingContainer.classList.remove("display-block");
+              state.listenOpponentDataAndHistory(() => {
+                state.setOnlineStatus();
+                state.pushMyGame(() => {
+                  Router.go("/rules");
+                  formEl.classList.remove("display-none");
+                  waitingContainer.classList.remove("display-block");
+                });
               });
             });
           }

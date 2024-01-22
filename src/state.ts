@@ -31,12 +31,7 @@ const state = {
   },
   listeners: [],
 
-  init() {
-    const localData = localStorage.getItem("saved-state");
-    if (localData) {
-      this.setState(JSON.parse(localData));
-    }
-  },
+  init() {},
 
   getState() {
     return this.data;
@@ -47,7 +42,6 @@ const state = {
     for (const callback of this.listeners) {
       callback(this.data);
     }
-    localStorage.setItem("saved-state", JSON.stringify(newState));
     console.log("El estado cambió", this.data);
   },
 
@@ -143,31 +137,13 @@ const state = {
       .then((data) => {
         cs.rtdbGameroomId = data.rtdbGameroomId;
         this.setState(cs);
-        this.listenOpponentDataAndHistory();
       });
   },
 
-  listenOpponentDataAndHistory() {
+  listenOpponentDataAndHistory(cb) {
     const cs = this.getState();
     const { userId } = cs;
     const { rtdbGameroomId } = cs;
-
-    const gameroomRef = db.ref(
-      rtdb,
-      "/gamerooms/" + rtdbGameroomId + "/currentGame"
-    );
-    db.onValue(gameroomRef, (snapshot) => {
-      snapshot.forEach((childSnapshot) => {
-        const childKey = childSnapshot.key;
-        if (childKey != userId) {
-          cs.opponentId = childKey;
-          cs.opponentGame = childSnapshot.val();
-          this.setState(cs);
-          db.off(gameroomRef);
-          this.listenOpponentGame();
-        }
-      });
-    });
 
     const historyRef = db.ref(
       rtdb,
@@ -198,6 +174,24 @@ const state = {
       }
 
       this.setState(cs);
+      cb();
+    });
+
+    const gameroomRef = db.ref(
+      rtdb,
+      "/gamerooms/" + rtdbGameroomId + "/currentGame"
+    );
+    db.onValue(gameroomRef, (snapshot) => {
+      snapshot.forEach((childSnapshot) => {
+        const childKey = childSnapshot.key;
+        if (childKey != userId) {
+          cs.opponentId = childKey;
+          cs.opponentGame = childSnapshot.val();
+          this.setState(cs);
+          db.off(gameroomRef);
+          this.listenOpponentGame();
+        }
+      });
     });
   },
 
