@@ -30,7 +30,7 @@ export function init() {
 
             state.setGameroomId(e.target["id"].value);
             state.accessToRoom(() => {
-              state.listenOpponentDataAndHistory(() => {
+              state.listenHistory(() => {
                 state.setOnlineStatus();
                 state.pushMyGame(() => {
                   Router.go("/rules");

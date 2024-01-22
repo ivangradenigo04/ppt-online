@@ -31,7 +31,12 @@ const state = {
   },
   listeners: [],
 
-  init() {},
+  init() {
+    const localData = localStorage.getItem("saved-state");
+    if (localData) {
+      this.setState(JSON.parse(localData));
+    }
+  },
 
   getState() {
     return this.data;
@@ -42,6 +47,7 @@ const state = {
     for (const callback of this.listeners) {
       callback(this.data);
     }
+    localStorage.setItem("saved-state", JSON.stringify(newState));
     console.log("El estado cambió", this.data);
   },
 
@@ -137,45 +143,14 @@ const state = {
       .then((data) => {
         cs.rtdbGameroomId = data.rtdbGameroomId;
         this.setState(cs);
+        this.listenOpponentData();
       });
   },
 
-  listenOpponentDataAndHistory(cb) {
+  listenOpponentData() {
     const cs = this.getState();
     const { userId } = cs;
     const { rtdbGameroomId } = cs;
-
-    const historyRef = db.ref(
-      rtdb,
-      "/gamerooms/" + rtdbGameroomId + "/history"
-    );
-    db.get(historyRef).then((snapshot) => {
-      let opponentWinsFound = false;
-      let myWinsFound = false;
-
-      snapshot.forEach((childSnapshot) => {
-        const childKey = childSnapshot.key;
-
-        if (childKey !== userId) {
-          cs.history.opponentWins = childSnapshot.val();
-          opponentWinsFound = true;
-        } else if (childKey === userId) {
-          cs.history.myWins = childSnapshot.val();
-          myWinsFound = true;
-        }
-      });
-
-      if (!opponentWinsFound) {
-        cs.history.opponentWins = 0;
-      }
-
-      if (!myWinsFound) {
-        cs.history.myWins = 0;
-      }
-
-      this.setState(cs);
-      cb();
-    });
 
     const gameroomRef = db.ref(
       rtdb,
@@ -192,6 +167,51 @@ const state = {
           this.listenOpponentGame();
         }
       });
+    });
+  },
+
+  listenHistory(cb) {
+    const cs = this.getState();
+    const { userId } = cs;
+    const { rtdbGameroomId } = cs;
+
+    const historyRef = db.ref(
+      rtdb,
+      "/gamerooms/" + rtdbGameroomId + "/history"
+    );
+    db.get(historyRef).then((snapshot) => {
+      if (snapshot.exists) {
+        let opponentWinsFound = false;
+        let myWinsFound = false;
+
+        snapshot.forEach((childSnapshot) => {
+          const childKey = childSnapshot.key;
+
+          if (childKey !== userId) {
+            cs.history.opponentWins = childSnapshot.val();
+            opponentWinsFound = true;
+          } else if (childKey === userId) {
+            cs.history.myWins = childSnapshot.val();
+            myWinsFound = true;
+          }
+        });
+
+        if (!opponentWinsFound) {
+          cs.history.opponentWins = 0;
+        }
+
+        if (!myWinsFound) {
+          cs.history.myWins = 0;
+        }
+
+        this.setState(cs);
+        cb();
+      } else {
+        cs.history.opponentWins = 0;
+        cs.history.myWins = 0;
+        this.setState(cs);
+        cb();
+      }
     });
   },
 

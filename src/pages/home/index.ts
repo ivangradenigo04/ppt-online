@@ -32,7 +32,7 @@ export function init() {
 
               state.askNewRoom(() => {
                 state.accessToRoom(() => {
-                  state.listenOpponentDataAndHistory(() => {
+                  state.listenHistory(() => {
                     state.setOnlineStatus();
                     state.pushMyGame(() => {
                       Router.go("/new-game");
